@@ -91,7 +91,7 @@ proc setcheckbuttonbitsvalue {setvalue} {
     global bitvar
     global bitstring
 
-    puts "setcheckbuttonbitsvalue: $setvalue"
+    ## puts "setcheckbuttonbitsvalue: $setvalue"
     foreach i $BITGORUP {
         ## puts "i: $i"
         for {set j 0} {$j < 32} {incr j} {
@@ -102,7 +102,7 @@ proc setcheckbuttonbitsvalue {setvalue} {
     }
 }
 
-proc updateonset {bitswidth} {
+proc updateonset {setbitswidth} {
     ## global bitvar
     ## global bitstring
     ## global valuehex
@@ -110,25 +110,28 @@ proc updateonset {bitswidth} {
     ## global valueoct
     global valuebin
 
-    set nbitsvaluebin ""
-    ## puts "set clicked"
-    # No need to set here, cause trace of entry will update check button bits
-    ## setcheckbuttonbitsvalue 1
+    ## puts "-->setbitswidth: $setbitswidth set begin<--"
+    if {$setbitswidth != ""} {
+        set nbitsvaluebin ""
+        # No need to set here, cause trace of entry will update check button bits
+        ## setcheckbuttonbitsvalue 1
 
-    ## puts "-->set hex<--"
-    for {set j 0} {$j < $bitswidth} {incr j} {
-        set nbitsvaluebin "${nbitsvaluebin}1"
+        ## puts "-->set hex<--"
+        for {set j 0} {$j < $setbitswidth} {incr j} {
+            set nbitsvaluebin "${nbitsvaluebin}1"
+        }
+        ## puts "setbitswidth=$setbitswidth, calnbits=[string length $nbitsvaluebin]: $nbitsvaluebin "
+        set valuebin $nbitsvaluebin
+        ## puts "-->set hex<--"
+        # no need to set others, cause they will be set in trace valuehex
+        ## set valuedec [format %llu 0x${valuehex}]
+        ## set valueoct [format %llo 0x${valuehex}]
+        ## set valuebin [format %llb 0x${valuehex}]
+
+        ## set valuebin [hex2bin FFFFFFFFFFFFFFFF]
+        ## set valuedec [expr {0x$valuehex}]
     }
-    puts "bitswidth=$bitswidth, calnbits=[string length $nbitsvaluebin]: $nbitsvaluebin "
-    set valuebin $nbitsvaluebin
-    ## puts "-->set hex<--"
-    # no need to set others, cause they will be set in trace valuehex
-    ## set valuedec [format %llu 0x${valuehex}]
-    ## set valueoct [format %llo 0x${valuehex}]
-    ## set valuebin [format %llb 0x${valuehex}]
-
-    ## set valuebin [hex2bin FFFFFFFFFFFFFFFF]
-    ## set valuedec [expr {0x$valuehex}]
+    ## puts "-->setbitswidth: $setbitswidth set end<--"
 }
 
 proc updateonclear {} {
@@ -152,20 +155,66 @@ proc updateonclear {} {
     # set valuebin 0
 }
 
+proc updateonshift {direction shiftbitswidth} {
+    ## global bitvar
+    ## global bitstring
+    ## global valuehex
+    ## global valuedec
+    ## global valueoct
+    global valuebin
+
+    set nbitsvaluebin ""
+
+    ## puts "-->$direction shift $shiftbitswidth bits begin, valuebin: $valuebin<--"
+    if {$shiftbitswidth != "" && $valuebin != ""} {
+        ## puts "shiftbinwidth not null"
+        if {$direction == "left"} {
+            set valuebin [format %llb [expr 0b$valuebin << $shiftbitswidth]]
+        } elseif {$direction == "right"} {
+            set valuebin [format %llb [expr 0b$valuebin >> $shiftbitswidth]]
+        }
+        ## puts "after shift valuebin: $valuebin "
+    }
+    ## puts "-->$direction shift $shiftbitswidth bits end, valuebin: $valuebin<--"
+}
+
+
 # Bit click button sub area
 set buttonclickpadx 100
+set buttonclickpady 5
 set buttonclickwidth 12
 ## frame .buttonlist${BTCLICK} -borderwidth 4 -relief ridge
 frame .buttonlist${BTCLICK}
 grid .buttonlist${BTCLICK} -padx 20 -pady 10 -row ${BTCLICK} -column 0
-button .buttonlist${BTCLICK}.setbt64bits -text "Set  64  Bits" -width $buttonclickwidth -command {updateonset 64}
-grid .buttonlist${BTCLICK}.setbt64bits -row 0 -column 0 -padx $buttonclickpadx
-button .buttonlist${BTCLICK}.clearbt -text "clear" -width $buttonclickwidth -command {updateonclear}
-grid .buttonlist${BTCLICK}.clearbt -row 0 -column 1 -padx [expr {$buttonclickpadx-2}]
-button .buttonlist${BTCLICK}.setbt32bits -text "Set  32  Bits" -width $buttonclickwidth -command {updateonset 32}
-grid .buttonlist${BTCLICK}.setbt32bits -row 0 -column 2 -padx $buttonclickpadx
+button .buttonlist${BTCLICK}.set64bitsbt -text "Set  64  Bits" -width $buttonclickwidth -command {updateonset 64}
+grid .buttonlist${BTCLICK}.set64bitsbt -row 0 -column 0 -padx $buttonclickpadx -pady $buttonclickpady
+button .buttonlist${BTCLICK}.clearbt -text "clear" -width [expr {$buttonclickwidth-2}] -command {updateonclear}
+grid .buttonlist${BTCLICK}.clearbt -row 0 -column 1 -padx $buttonclickpadx -pady $buttonclickpady
+button .buttonlist${BTCLICK}.set32bitsbt -text "Set  32  Bits" -width $buttonclickwidth -command {updateonset 32}
+grid .buttonlist${BTCLICK}.set32bitsbt -row 0 -column 2 -padx $buttonclickpadx -pady $buttonclickpady
 
 # Bit entry button  sub area
+set buttonentrypadx 40
+set buttonentrypady 5
+## frame .buttonlist${BTENTRY} -borderwidth 4 -relief ridge
+frame .buttonlist${BTENTRY}
+grid .buttonlist${BTENTRY} -padx 20 -pady 10 -row ${BTENTRY} -column 0
+button .buttonlist${BTENTRY}.leftshiftbt -text "left shift <<" -width $buttonclickwidth -command {updateonshift left $shiftnbits}
+grid .buttonlist${BTENTRY}.leftshiftbt -row 0 -column 0 -padx $buttonentrypadx -pady $buttonentrypady
+entry .buttonlist${BTENTRY}.shiftbitsentry -textvariable shiftnbits \
+    -width 10 -validate key -vcmd {string is digit %P}
+grid .buttonlist${BTENTRY}.shiftbitsentry -row 0 -column 1
+label .buttonlist${BTENTRY}.shiftbitslabel -text "Bits" -width 4
+grid .buttonlist${BTENTRY}.shiftbitslabel -row 0 -column 2
+button .buttonlist${BTENTRY}.rightshiftbt -text ">> right  shift" -width $buttonclickwidth -command {updateonshift right $shiftnbits}
+grid .buttonlist${BTENTRY}.rightshiftbt -row 0 -column 3 -padx $buttonentrypadx -pady $buttonentrypady
+button .buttonlist${BTENTRY}.setnbitsbt -text "Set n Bits" -width $buttonclickwidth -command {updateonset $setnbits}
+grid .buttonlist${BTENTRY}.setnbitsbt -row 0 -column 4 -padx $buttonentrypadx -pady $buttonentrypady
+entry .buttonlist${BTENTRY}.setnbitsentry -textvariable setnbits \
+    -width 10 -validate key -vcmd {string is digit %P}
+grid .buttonlist${BTENTRY}.setnbitsentry -row 0 -column 5
+label .buttonlist${BTENTRY}.setnbitslabel -text "Bits" -width 4
+grid .buttonlist${BTENTRY}.setnbitslabel -row 0 -column 6
 
 
 # >=====Entry Area=====<
@@ -190,10 +239,10 @@ proc tracer args {
     trace remove variable valuebin write tracer
 
     set variabletype [lindex $args 0]
-    puts "$variabletype => begin"
+    ## puts "$variabletype => begin"
     if {$variabletype == "valuehex"} {
         if {$valuehex == ""} {
-            puts "empty valuehex: $valuehex"
+            ## puts "empty valuehex: $valuehex"
             set valuedec $valuehex
             set valueoct $valuehex
             set valuebin $valuehex
@@ -205,7 +254,7 @@ proc tracer args {
         }
     } elseif {$variabletype == "valuedec"} {
         if {$valuedec == ""} {
-            puts "empty valuedec: $valuedec"
+            ## puts "empty valuedec: $valuedec"
             set valuehex $valuedec
             set valueoct $valuedec
             set valuebin $valuedec
@@ -217,12 +266,12 @@ proc tracer args {
         }
     } elseif {$variabletype == "valueoct"} {
         if {$valueoct == ""} {
-            puts "empty valueoct: $valueoct"
+            ## puts "empty valueoct: $valueoct"
             set valuehex $valueoct
             set valuedec $valueoct
             set valuebin $valueoct
         } else {
-            puts "not empty valueoct: $valueoct"
+            ## puts "not empty valueoct: $valueoct"
             set valueoct [format %llo [scan $valueoct %llo]]
             set valuehex [format %llX 0o$valueoct]
             set valuedec [format %llu 0o$valueoct]
@@ -241,7 +290,7 @@ proc tracer args {
         }
     }
 
-    puts "$variabletype => end"
+    ## puts "$variabletype => end"
 
     # Update data to bits check buttons
     # if the value is update by bits check buttons,
@@ -252,9 +301,9 @@ proc tracer args {
         } else {
             set valuebinfullbith2l [format %064llb 0b$valuebin]
         }
-        puts "valuebinfullbith2l: $valuebinfullbith2l"
+        ## puts "valuebinfullbith2l: $valuebinfullbith2l"
         set valuebinfullbitl2h [string reverse $valuebinfullbith2l]
-        puts "valuebinfullbitl2h: $valuebinfullbitl2h"
+        ## puts "valuebinfullbitl2h: $valuebinfullbitl2h"
         set valuebinfullbitl2hlist [split $valuebinfullbitl2h {}]
 
         foreach i $BITGORUP {
