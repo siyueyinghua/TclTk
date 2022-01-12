@@ -15,6 +15,8 @@ set ENTRYDEC  5
 set ENTRYOCT  6
 set ENTRYBIN  7
 set updatebybitcbflag 0
+set setnbits 16
+set shiftnbits 32
 
 # >=====bits button area=====<
 frame .buttonlist${CBUPPER} -borderwidth 4 -relief ridge
