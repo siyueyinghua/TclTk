@@ -1,5 +1,11 @@
 #!/usr/local/bin/wish
 
+#===========================================#
+#       Author:         mingguang.ye        #
+#       Version:        V1.0                #
+#       last Updated:   2022/01/12          #
+#===========================================#
+
 # window properity
 wm title . "RegView_V1.0 by mingguang.ye"
 wm resizable . 0 0
