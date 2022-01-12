@@ -216,7 +216,7 @@ label .buttonlist${BTENTRY}.shiftbitslabel -text "Bits" -width 4
 grid .buttonlist${BTENTRY}.shiftbitslabel -row 0 -column 2
 button .buttonlist${BTENTRY}.rightshiftbt -text ">> right  shift" -width $buttonclickwidth -command {updateonshift right $shiftnbits}
 grid .buttonlist${BTENTRY}.rightshiftbt -row 0 -column 3 -padx $buttonentrypadx -pady $buttonentrypady
-button .buttonlist${BTENTRY}.setnbitsbt -text "Set n Bits" -width $buttonclickwidth -command {updateonset $setnbits}
+button .buttonlist${BTENTRY}.setnbitsbt -text "Set  n  Bits" -width $buttonclickwidth -command {updateonset $setnbits}
 grid .buttonlist${BTENTRY}.setnbitsbt -row 0 -column 4 -padx $buttonentrypadx -pady $buttonentrypady
 entry .buttonlist${BTENTRY}.setnbitsentry -textvariable setnbits \
     -width 10 -validate key -vcmd {string is digit %P}
