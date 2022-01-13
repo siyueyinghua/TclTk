@@ -69,7 +69,7 @@ proc placebitbutton { group n } {
     set fbgmod [expr {$n%4}]
     ## puts "$fbg $fbgmod"
     if {$fbgmod ==0} {
-        frame .buttonlist${group}.fourbit${fbg}
+        frame .buttonlist${group}.fourbit${fbg} -borderwidth 2 -relief ridge
         grid .buttonlist${group}.fourbit${fbg} -row $group -column [expr {7-$fbg}] -padx 4 -pady 2
     }
     ## puts stdout .buttonlist${group}.fourbit${fbg}.bitcb${n}
