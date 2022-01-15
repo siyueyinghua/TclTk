@@ -15,11 +15,12 @@ set CBLOWER 0
 set CBUPPER 1
 set BITGORUP [list $CBLOWER $CBUPPER]
 set BTCLICK  2
-set BTENTRY  3
-set ENTRYHEX  4
-set ENTRYDEC  5
-set ENTRYOCT  6
-set ENTRYBIN  7
+set BTENTRY0  3
+set BTENTRY1  4
+set ENTRYHEX  5
+set ENTRYDEC  6
+set ENTRYOCT  7
+set ENTRYBIN  8
 set updatebybitcbflag 0
 set setnbits 16
 set shiftnbits 32
@@ -204,25 +205,53 @@ grid .buttonlist${BTCLICK}.set32bitsbt -row 0 -column 2 -padx $buttonclickpadx -
 # Bit entry button  sub area
 set buttonentrypadx 40
 set buttonentrypady 5
-## frame .buttonlist${BTENTRY} -borderwidth 4 -relief ridge
-frame .buttonlist${BTENTRY}
-grid .buttonlist${BTENTRY} -padx 20 -pady 10 -row ${BTENTRY} -column 0
-button .buttonlist${BTENTRY}.leftshiftbt -text "left shift <<" -width $buttonclickwidth -command {updateonshift left $shiftnbits}
-grid .buttonlist${BTENTRY}.leftshiftbt -row 0 -column 0 -padx $buttonentrypadx -pady $buttonentrypady
-entry .buttonlist${BTENTRY}.shiftbitsentry -textvariable shiftnbits \
+## frame .buttonlist${BTENTRY0} -borderwidth 4 -relief ridge
+frame .buttonlist${BTENTRY0}
+grid .buttonlist${BTENTRY0} -padx 20 -pady 10 -row ${BTENTRY0} -column 0
+#===> Shift
+button .buttonlist${BTENTRY0}.leftshiftbt -text "left shift <<" -width $buttonclickwidth -command {updateonshift left $shiftnbits}
+grid .buttonlist${BTENTRY0}.leftshiftbt -row 0 -column 0 -padx $buttonentrypadx -pady $buttonentrypady
+entry .buttonlist${BTENTRY0}.shiftbitsentry -textvariable shiftnbits \
     -width 10 -validate key -vcmd {string is digit %P}
-grid .buttonlist${BTENTRY}.shiftbitsentry -row 0 -column 1
-label .buttonlist${BTENTRY}.shiftbitslabel -text "Bits" -width 4
-grid .buttonlist${BTENTRY}.shiftbitslabel -row 0 -column 2
-button .buttonlist${BTENTRY}.rightshiftbt -text ">> right  shift" -width $buttonclickwidth -command {updateonshift right $shiftnbits}
-grid .buttonlist${BTENTRY}.rightshiftbt -row 0 -column 3 -padx $buttonentrypadx -pady $buttonentrypady
-button .buttonlist${BTENTRY}.setnbitsbt -text "Set  n  Bits" -width $buttonclickwidth -command {updateonset $setnbits}
-grid .buttonlist${BTENTRY}.setnbitsbt -row 0 -column 4 -padx $buttonentrypadx -pady $buttonentrypady
-entry .buttonlist${BTENTRY}.setnbitsentry -textvariable setnbits \
+grid .buttonlist${BTENTRY0}.shiftbitsentry -row 0 -column 1
+label .buttonlist${BTENTRY0}.shiftbitslabel -text "Bits" -width 4
+grid .buttonlist${BTENTRY0}.shiftbitslabel -row 0 -column 2
+button .buttonlist${BTENTRY0}.rightshiftbt -text ">> right  shift" -width $buttonclickwidth -command {updateonshift right $shiftnbits}
+grid .buttonlist${BTENTRY0}.rightshiftbt -row 0 -column 3 -padx $buttonentrypadx -pady $buttonentrypady
+
+#===> Set n bits
+button .buttonlist${BTENTRY0}.setnbitsbt -text "Set  n  Bits" -width $buttonclickwidth -command {updateonset $setnbits}
+grid .buttonlist${BTENTRY0}.setnbitsbt -row 0 -column 4 -padx $buttonentrypadx -pady $buttonentrypady
+entry .buttonlist${BTENTRY0}.setnbitsentry -textvariable setnbits \
     -width 10 -validate key -vcmd {string is digit %P}
-grid .buttonlist${BTENTRY}.setnbitsentry -row 0 -column 5
-label .buttonlist${BTENTRY}.setnbitslabel -text "Bits" -width 4
-grid .buttonlist${BTENTRY}.setnbitslabel -row 0 -column 6
+grid .buttonlist${BTENTRY0}.setnbitsentry -row 0 -column 5
+label .buttonlist${BTENTRY0}.setnbitslabel -text "Bits" -width 4
+grid .buttonlist${BTENTRY0}.setnbitslabel -row 0 -column 6
+
+#===> region sets value
+## frame .buttonlist${BTENTRY1} -borderwidth 4 -relief ridge
+set btentry1btpadx 20
+set btentry1etpadx 5
+set btentry1lbpadx 10
+frame .buttonlist${BTENTRY1}
+grid .buttonlist${BTENTRY1} -padx 20 -pady 10 -row ${BTENTRY1} -column 0
+label .buttonlist${BTENTRY1}.setvaluebeginbitlb -text "From" -anchor e -justify right -width 10
+grid .buttonlist${BTENTRY1}.setvaluebeginbitlb -row 1 -column 0 -padx $btentry1lbpadx
+entry .buttonlist${BTENTRY1}.setvaluebeginbitsentry -textvariable setvaluebeginbit \
+    -width 10 -validate key -vcmd {string is digit %P}
+grid .buttonlist${BTENTRY1}.setvaluebeginbitsentry -row 1 -column 1 -padx $btentry1etpadx
+label .buttonlist${BTENTRY1}.setvalueendbitlb -text "To"  -anchor e -justify right -width 10
+grid .buttonlist${BTENTRY1}.setvalueendbitlb -row 1 -column 2 -padx $btentry1lbpadx
+entry .buttonlist${BTENTRY1}.setvalueendbitsentry -textvariable setvalueendbit \
+    -width 10 -validate key -vcmd {string is digit %P}
+grid .buttonlist${BTENTRY1}.setvalueendbitsentry -row 1 -column 3 -padx $btentry1etpadx
+label .buttonlist${BTENTRY1}.setvaluelb -text "Values"  -anchor e -justify right -width 10
+grid .buttonlist${BTENTRY1}.setvaluelb -row 1 -column 4 -padx $btentry1lbpadx
+entry .buttonlist${BTENTRY1}.setvalueentry -textvariable setvaluevar \
+    -width 10 -validate key -vcmd {string is digit %P}
+grid .buttonlist${BTENTRY1}.setvalueentry -row 1 -column 5 -padx $btentry1etpadx
+button .buttonlist${BTENTRY1}.setvaluebt -text "Set" -width 6 -command {updateonset $setnbits}
+grid .buttonlist${BTENTRY1}.setvaluebt -row 1 -column 6 -padx $btentry1btpadx -pady $buttonentrypady
 
 
 # >=====Entry Area=====<
