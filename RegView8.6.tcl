@@ -15,11 +15,12 @@ set CBLOWER 0
 set CBUPPER 1
 set BITGORUP [list $CBLOWER $CBUPPER]
 set BTCLICK  2
-set BTENTRY  3
-set ENTRYHEX  4
-set ENTRYDEC  5
-set ENTRYOCT  6
-set ENTRYBIN  7
+set BTENTRY0  3
+set BTENTRY1  4
+set ENTRYHEX  5
+set ENTRYDEC  6
+set ENTRYOCT  7
+set ENTRYBIN  8
 set updatebybitcbflag 0
 set setnbits 16
 set shiftnbits 32
@@ -187,13 +188,14 @@ proc updateonshift {direction shiftbitswidth} {
 }
 
 
+
 # Bit click button sub area
 set buttonclickpadx 100
 set buttonclickpady 5
 set buttonclickwidth 12
 ## frame .buttonlist${BTCLICK} -borderwidth 4 -relief ridge
 frame .buttonlist${BTCLICK}
-grid .buttonlist${BTCLICK} -padx 20 -pady 10 -row ${BTCLICK} -column 0
+grid .buttonlist${BTCLICK} -padx 20 -pady 20 -row ${BTCLICK} -column 0
 button .buttonlist${BTCLICK}.set64bitsbt -text "Set  64  Bits" -width $buttonclickwidth -command {updateonset 64}
 grid .buttonlist${BTCLICK}.set64bitsbt -row 0 -column 0 -padx $buttonclickpadx -pady $buttonclickpady
 button .buttonlist${BTCLICK}.clearbt -text "clear" -width [expr {$buttonclickwidth-2}] -command {updateonclear}
@@ -204,29 +206,157 @@ grid .buttonlist${BTCLICK}.set32bitsbt -row 0 -column 2 -padx $buttonclickpadx -
 # Bit entry button  sub area
 set buttonentrypadx 40
 set buttonentrypady 5
-## frame .buttonlist${BTENTRY} -borderwidth 4 -relief ridge
-frame .buttonlist${BTENTRY}
-grid .buttonlist${BTENTRY} -padx 20 -pady 10 -row ${BTENTRY} -column 0
-button .buttonlist${BTENTRY}.leftshiftbt -text "left shift <<" -width $buttonclickwidth -command {updateonshift left $shiftnbits}
-grid .buttonlist${BTENTRY}.leftshiftbt -row 0 -column 0 -padx $buttonentrypadx -pady $buttonentrypady
-entry .buttonlist${BTENTRY}.shiftbitsentry -textvariable shiftnbits \
+## frame .buttonlist${BTENTRY0} -borderwidth 4 -relief ridge
+frame .buttonlist${BTENTRY0}
+grid .buttonlist${BTENTRY0} -padx 20 -pady 10 -row ${BTENTRY0} -column 0
+#===> Shift
+button .buttonlist${BTENTRY0}.leftshiftbt -text "left shift <<" -width $buttonclickwidth -command {updateonshift left $shiftnbits}
+grid .buttonlist${BTENTRY0}.leftshiftbt -row 0 -column 0 -padx $buttonentrypadx -pady $buttonentrypady
+entry .buttonlist${BTENTRY0}.shiftbitsentry -textvariable shiftnbits \
     -width 10 -validate key -vcmd {string is digit %P}
-grid .buttonlist${BTENTRY}.shiftbitsentry -row 0 -column 1
-label .buttonlist${BTENTRY}.shiftbitslabel -text "Bits" -width 4
-grid .buttonlist${BTENTRY}.shiftbitslabel -row 0 -column 2
-button .buttonlist${BTENTRY}.rightshiftbt -text ">> right  shift" -width $buttonclickwidth -command {updateonshift right $shiftnbits}
-grid .buttonlist${BTENTRY}.rightshiftbt -row 0 -column 3 -padx $buttonentrypadx -pady $buttonentrypady
-button .buttonlist${BTENTRY}.setnbitsbt -text "Set  n  Bits" -width $buttonclickwidth -command {updateonset $setnbits}
-grid .buttonlist${BTENTRY}.setnbitsbt -row 0 -column 4 -padx $buttonentrypadx -pady $buttonentrypady
-entry .buttonlist${BTENTRY}.setnbitsentry -textvariable setnbits \
+grid .buttonlist${BTENTRY0}.shiftbitsentry -row 0 -column 1
+label .buttonlist${BTENTRY0}.shiftbitslabel -text "Bits" -width 4
+grid .buttonlist${BTENTRY0}.shiftbitslabel -row 0 -column 2
+button .buttonlist${BTENTRY0}.rightshiftbt -text ">> right  shift" -width $buttonclickwidth -command {updateonshift right $shiftnbits}
+grid .buttonlist${BTENTRY0}.rightshiftbt -row 0 -column 3 -padx $buttonentrypadx -pady $buttonentrypady
+
+#===> Set n bits
+button .buttonlist${BTENTRY0}.setnbitsbt -text "Set  n  Bits" -width $buttonclickwidth -command {updateonset $setnbits}
+grid .buttonlist${BTENTRY0}.setnbitsbt -row 0 -column 4 -padx $buttonentrypadx -pady $buttonentrypady
+entry .buttonlist${BTENTRY0}.setnbitsentry -textvariable setnbits \
     -width 10 -validate key -vcmd {string is digit %P}
-grid .buttonlist${BTENTRY}.setnbitsentry -row 0 -column 5
-label .buttonlist${BTENTRY}.setnbitslabel -text "Bits" -width 4
-grid .buttonlist${BTENTRY}.setnbitslabel -row 0 -column 6
+grid .buttonlist${BTENTRY0}.setnbitsentry -row 0 -column 5
+label .buttonlist${BTENTRY0}.setnbitslabel -text "Bits" -width 4
+grid .buttonlist${BTENTRY0}.setnbitslabel -row 0 -column 6
+
+# >=====Set region bits Area=====<
+proc updateonsetvalue {} {
+    global valuebin
+    global setvaluebeginbit
+    global setvalueendbit
+    global setvaluevardec
+
+    if {$setvaluebeginbit == "" || $setvalueendbit == "" || $setvaluevardec == "" || [expr $setvaluebeginbit > $setvalueendbit]} {
+        return
+    }
+    ## puts "-->updateonsetvalue set begin valuebin: $valuebin, setvaluevardec: $setvaluevardec<--"
+    if {$valuebin == ""} {
+        set valuebin 0
+    }
+    set setvaluebitwidth [expr $setvalueendbit - $setvaluebeginbit + 1]
+    ## puts "setvaluebitwidth: $setvaluebitwidth, setvalueendbit: $setvalueendbit"
+    set valuebinalign2endbit [format %0[expr ${setvalueendbit} + 1]llb 0b$valuebin]
+    set valuebinalign2endbitl2h [string reverse $valuebinalign2endbit]
+    ## puts "valuebinalign2endbitl2h: $valuebinalign2endbitl2h"
+
+    set setvaluevarbinalign2setwidth [format %0${setvaluebitwidth}llb $setvaluevardec]
+    ## puts "setvaluevarbinalign2setwidth: $setvaluevarbinalign2setwidth"
+    set setvaluevarbinalign2setwidthl2h [string reverse $setvaluevarbinalign2setwidth]
+    ## puts "setvaluevarbinalign2setwidthl2h: $setvaluevarbinalign2setwidthl2h"
+    set setvaluevarbinalign2setwidthl2h [string range $setvaluevarbinalign2setwidthl2h 0 [expr $setvaluebitwidth - 1]]
+    ## puts "setvaluevarbinalign2setwidthl2h truncate: $setvaluevarbinalign2setwidthl2h"
+    set valuebinalign2endbitnew [string replace $valuebinalign2endbitl2h $setvaluebeginbit $setvalueendbit $setvaluevarbinalign2setwidthl2h]
+    ## puts "valuebinalign2endbitnew: $valuebinalign2endbitnew"
+    set valuebin [string reverse $valuebinalign2endbitnew]
+    ## puts "valuebin: $valuebin"
+
+}
+
+proc tracerset args {
+    global setvaluevarhex
+    global setvaluevardec
+    global setvaluevarbin
+
+    # Remove trace to avoid tracing recursively
+    trace remove variable setvaluevarhex write tracerset
+    trace remove variable setvaluevardec write tracerset
+    trace remove variable setvaluevarbin write tracerset
+
+    set variabletype [lindex $args 0]
+    ## puts "$variabletype => begin"
+    if {$variabletype == "setvaluevarhex"} {
+        if {$setvaluevarhex == ""} {
+            ## puts "empty setvaluevarhex: $setvaluevarhex"
+            set setvaluevardec $setvaluevarhex
+            set setvaluevarbin $setvaluevarhex
+        } else {
+            set setvaluevarhex [format %lX [scan $setvaluevarhex %lX]]
+            set setvaluevardec [format %lu 0x$setvaluevarhex]
+            set setvaluevarbin [format %lb 0x$setvaluevarhex]
+        }
+    } elseif {$variabletype == "setvaluevardec"} {
+        if {$setvaluevardec == ""} {
+            ## puts "empty setvaluevardec: $setvaluevardec"
+            set setvaluevarhex $setvaluevardec
+            set setvaluevarbin $setvaluevardec
+        } else {
+            set setvaluevardec [scan $setvaluevardec %ld]
+            set setvaluevarhex [format %lX [scan $setvaluevardec %ld]]
+            set setvaluevarbin [format %lb [scan $setvaluevardec %ld]]
+        }
+    } elseif {$variabletype == "setvaluevarbin"} {
+        if {$setvaluevarbin == ""} {
+            set setvaluevarhex $setvaluevarbin
+            set setvaluevardec $setvaluevarbin
+        } else {
+            set setvaluevarbin [format %lb [scan $setvaluevarbin %lb]]
+            set setvaluevarhex [format %lX 0b$setvaluevarbin]
+            set setvaluevardec [format %lu 0b$setvaluevarbin]
+        }
+    }
+
+    # Add trace again for later tracing
+    trace add variable setvaluevarhex write tracerset
+    trace add variable setvaluevardec write tracerset
+    trace add variable setvaluevarbin write tracerset
+}
+
+
+#===> region sets value
+## frame .buttonlist${BTENTRY1} -borderwidth 4 -relief ridge
+set btentry1btpadx 80
+set btentry1etpadx 5
+set btentry1lbpadx 10
+frame .buttonlist${BTENTRY1}
+grid .buttonlist${BTENTRY1} -padx 10 -pady 20 -row ${BTENTRY1} -column 0
+label .buttonlist${BTENTRY1}.setvaluebeginbitlb -text "From(Low)" -anchor e -justify right -width 10
+grid .buttonlist${BTENTRY1}.setvaluebeginbitlb -row 2 -column 0 -padx $btentry1lbpadx
+entry .buttonlist${BTENTRY1}.setvaluebeginbitsentry -textvariable setvaluebeginbit \
+    -width 8 -validate key -vcmd {string is digit %P}
+grid .buttonlist${BTENTRY1}.setvaluebeginbitsentry -row 2 -column 1 -padx $btentry1etpadx
+label .buttonlist${BTENTRY1}.setvalueendbitlb -text "To(High)"  -anchor e -justify right -width 10
+grid .buttonlist${BTENTRY1}.setvalueendbitlb -row 2 -column 2 -padx $btentry1lbpadx
+entry .buttonlist${BTENTRY1}.setvalueendbitsentry -textvariable setvalueendbit \
+    -width 8 -validate key -vcmd {string is digit %P}
+grid .buttonlist${BTENTRY1}.setvalueendbitsentry -row 2 -column 3 -padx $btentry1etpadx
+
+label .buttonlist${BTENTRY1}.setvaluedeclb -text "Values(Dec)"  -anchor e -justify right -width 10
+grid .buttonlist${BTENTRY1}.setvaluedeclb -row 1 -column 4 -padx $btentry1lbpadx
+entry .buttonlist${BTENTRY1}.setvalueentrydec -textvariable setvaluevardec \
+    -width 20 -validate key -vcmd {string is digit %P}
+grid .buttonlist${BTENTRY1}.setvalueentrydec -row 1 -column 5 -padx $btentry1etpadx
+trace add variable setvaluevardec write tracerset
+
+label .buttonlist${BTENTRY1}.setvaluehexlb -text "Values(Hex)"  -anchor e -justify right -width 10
+grid .buttonlist${BTENTRY1}.setvaluehexlb -row 2 -column 4 -padx $btentry1lbpadx
+entry .buttonlist${BTENTRY1}.setvalueentryhex -textvariable setvaluevarhex \
+    -width 20 -validate key -vcmd {string is xdigit %P}
+grid .buttonlist${BTENTRY1}.setvalueentryhex -row 2 -column 5 -padx $btentry1etpadx
+trace add variable setvaluevarhex write tracerset
+
+label .buttonlist${BTENTRY1}.setvaluebinlb -text "Values(Bin)"  -anchor e -justify right -width 10
+grid .buttonlist${BTENTRY1}.setvaluebinlb -row 3 -column 4 -padx $btentry1lbpadx
+entry .buttonlist${BTENTRY1}.setvalueentrybin -textvariable setvaluevarbin \
+    -width 20 -validate key -vcmd {expr {![regexp {[^0-1]+} %P]}}
+grid .buttonlist${BTENTRY1}.setvalueentrybin -row 3 -column 5 -padx $btentry1etpadx
+trace add variable setvaluevarbin write tracerset
+
+button .buttonlist${BTENTRY1}.setvaluebt -text "Set" -width 6 -command {updateonsetvalue}
+grid .buttonlist${BTENTRY1}.setvaluebt -row 2 -column 6 -padx $btentry1btpadx -pady $buttonentrypady
 
 
 # >=====Entry Area=====<
-proc tracer args {
+proc tracerentry args {
     global BITGORUP
     global bitvar
     global bitstring
@@ -234,17 +364,13 @@ proc tracer args {
     global valuedec
     global valueoct
     global valuebin
-    global valuenull
     global updatebybitcbflag
-    # add a null entry to make use of its variable 
-    # as null value for normal entry's null value
-    #entry .nullentry -textvariable valuenull
 
     # Remove trace to avoid tracing recursively
-    trace remove variable valuehex write tracer
-    trace remove variable valuedec write tracer
-    trace remove variable valueoct write tracer
-    trace remove variable valuebin write tracer
+    trace remove variable valuehex write tracerentry
+    trace remove variable valuedec write tracerentry
+    trace remove variable valueoct write tracerentry
+    trace remove variable valuebin write tracerentry
 
     set variabletype [lindex $args 0]
     ## puts "$variabletype => begin"
@@ -327,10 +453,10 @@ proc tracer args {
     }
 
     # Add trace again for later tracing
-    trace add variable valuehex write tracer
-    trace add variable valuedec write tracer
-    trace add variable valueoct write tracer
-    trace add variable valuebin write tracer
+    trace add variable valuehex write tracerentry
+    trace add variable valuedec write tracerentry
+    trace add variable valueoct write tracerentry
+    trace add variable valuebin write tracerentry
 
     ## set i 0
     ## foreach arg $args {
@@ -340,13 +466,13 @@ proc tracer args {
 }
 
 frame .buttonlist${ENTRYHEX} -borderwidth 4 -relief ridge
-grid .buttonlist${ENTRYHEX} -padx 20 -pady 10 -row ${ENTRYHEX} -column 0
+grid .buttonlist${ENTRYHEX} -padx 20 -pady 20 -row ${ENTRYHEX} -column 0
 label .buttonlist${ENTRYHEX}.hexlabel -text "Heximal " -width 10
 grid .buttonlist${ENTRYHEX}.hexlabel -row 0 -column 0
 entry .buttonlist${ENTRYHEX}.hexentry -textvariable valuehex \
     -width 100 -validate key -vcmd {string is xdigit %P}
 grid .buttonlist${ENTRYHEX}.hexentry -row 0 -column 1
-trace add variable valuehex write tracer
+trace add variable valuehex write tracerentry
 
 frame .buttonlist${ENTRYDEC} -borderwidth 4 -relief ridge
 grid .buttonlist${ENTRYDEC} -padx 20 -pady 10 -row ${ENTRYDEC} -column 0
@@ -355,7 +481,7 @@ grid .buttonlist${ENTRYDEC}.declabel -row 0 -column 0
 entry .buttonlist${ENTRYDEC}.decentry -textvariable valuedec \
     -width 100 -validate key -vcmd {string is digit %P}
 grid .buttonlist${ENTRYDEC}.decentry -row 0 -column 1
-trace add variable valuedec write tracer
+trace add variable valuedec write tracerentry
 
 frame .buttonlist${ENTRYOCT} -borderwidth 4 -relief ridge
 grid .buttonlist${ENTRYOCT} -padx 20 -pady 10 -row ${ENTRYOCT} -column 0
@@ -364,7 +490,7 @@ grid .buttonlist${ENTRYOCT}.octlabel -row 0 -column 0
 entry .buttonlist${ENTRYOCT}.octentry -textvariable valueoct \
     -width 100 -validate key -vcmd {expr {![regexp {[^0-7]+} %P]}}
 grid .buttonlist${ENTRYOCT}.octentry -row 0 -column 1
-trace add variable valueoct write tracer
+trace add variable valueoct write tracerentry
 
 frame .buttonlist${ENTRYBIN} -borderwidth 4 -relief ridge
 grid .buttonlist${ENTRYBIN} -padx 20 -pady 10 -row ${ENTRYBIN} -column 0
@@ -373,5 +499,5 @@ grid .buttonlist${ENTRYBIN}.binlabel -row 0 -column 0
 entry .buttonlist${ENTRYBIN}.binentry -textvariable valuebin \
     -width 100 -validate key -vcmd {expr {![regexp {[^0-1]+} %P]}}
 grid .buttonlist${ENTRYBIN}.binentry -row 0 -column 1
-trace add variable valuebin write tracer
+trace add variable valuebin write tracerentry
 
