@@ -24,6 +24,8 @@ set ENTRYBIN  8
 set updatebybitcbflag 0
 set setnbits 16
 set shiftnbits 32
+set setvaluebeginbit 66
+set setvalueendbit 99
 
 # >=====bits button area=====<
 frame .buttonlist${CBUPPER} -borderwidth 4 -relief ridge
@@ -353,6 +355,8 @@ trace add variable setvaluevarbin write tracerset
 
 button .buttonlist${BTENTRY1}.setvaluebt -text "Set" -width 6 -command {updateonsetvalue}
 grid .buttonlist${BTENTRY1}.setvaluebt -row 2 -column 6 -padx $btentry1btpadx -pady $buttonentrypady
+
+set setvaluevardec 12345
 
 
 # >=====Entry Area=====<
